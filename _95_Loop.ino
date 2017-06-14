@@ -7,6 +7,7 @@ float zaccel;
 float accVel;
 float filVel;
 uint32_t p;
+float temper;
 
 void loop()
 {
@@ -52,6 +53,7 @@ void loop()
   dt = t - timers[4];
   if (dt >= 50) //process
   { timers[4] = t;
+    temper = ms5.readTemperature(true);
     //reg.lr_CalculateAverage();
     //reg.lr_CalculateSlope();
     //baroAlt = 0.01f * reg.gZAverage;
@@ -74,18 +76,18 @@ void loop()
 */
     myGLCD.clrScr();
     myGLCD.setFont(TinyFont);
-    myGLCD.print("volt:", LEFT, 0);
-    myGLCD.print("sw1:", LEFT, 6);
-    myGLCD.printNumI(digitalRead(2),16,6);
-    myGLCD.print("sw2:", LEFT, 12);
-    myGLCD.printNumI(digitalRead(3),16,12);
-    myGLCD.print("sw3:", LEFT, 18);
-    myGLCD.printNumI(digitalRead(4),16,18);
+   // myGLCD.print("volt:", LEFT, 0);
+    myGLCD.print("s:", LEFT, 4);
+    myGLCD.printNumI(digitalRead(2),8,4);
+    myGLCD.printNumI(digitalRead(3),12,4);
+    myGLCD.printNumI(digitalRead(4),16,4);
+    myGLCD.printNumI(millis()/1000,0,10);
+   // myGLCD.printNumF(temper,2,0,12);
     
     
     myGLCD.setFont(MediumNumbers);
     myGLCD.printNumF(batteryVoltage,2,RIGHT,0);
-    myGLCD.printNumI(millis()/1000,RIGHT,16);
+    ;myGLCD.printNumF(temper,2,RIGHT,16);
     myGLCD.printNumI(p,RIGHT,32);
     
     myGLCD.update();
