@@ -32,7 +32,7 @@ class mMS5611
     int32_t TEMP2;
     int64_t OFF2, SENS2;
 
-    int32_t temperature;
+    float temperature;
     uint32_t pressure;
     float QNH;
 
@@ -209,7 +209,7 @@ class mMS5611
       }
 
       TEMP = TEMP - TEMP2;
-      temperature = ((double)TEMP / 100);
+      temperature = ((float)TEMP *0.01f);
       return temperature;
     }
 
