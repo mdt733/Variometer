@@ -85,7 +85,7 @@ class mMS5611
       return value;
     }
 
-    bool begin(ms5611_osr_t osrfloat, float _QNH = 1013.25f)
+    bool begin(ms5611_osr_t osrfloat, float _QNH = 101325)
     {
       //work out qnh parameters;
       newQNH(_QNH);
@@ -218,19 +218,19 @@ class mMS5611
       return interpolate_table_1d(&altitude_LUT, _pressure);
     }
 
-    float calc_altitude(float _pressure, float _QNH = 1013.25)
+    float calc_altitude(float _pressure, float _QNH = 101325)
     {
-      return 44330.769 * (1 - pow((float)_pressure / _QNH, (0.1902949572)));
+      return 44330.769 * (1 - pow((float)_pressure / (_QNH*0.01), (0.1902949572)));
     }
 
     float findQNH(float _pressure, float _altitude)
     {
-      return _pressure / pow(1 - (_altitude / 44330.769), 5.255);
+      return 100*_pressure / pow(1 - (_altitude / 44330.769), 5.255);
     }
 
-    float findpressure(float _altitude, float _QNH = 1013.25)
+    float findpressure(float _altitude, float _QNH = 101325)
     {
-      return 100 * _QNH * pow(1 - (_altitude / 44330.769), 5.255);
+      return _QNH * pow(1 - (_altitude / 44330.769), 5.255);
     }
 };
 

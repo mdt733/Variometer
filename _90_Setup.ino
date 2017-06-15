@@ -1,13 +1,18 @@
 float gravity;
+uint32_t p;
 
 void setup() {
+  digitalWrite(7, HIGH);
+  toneAC(800);
+  delay(100);
+  toneAC(0);
+
   Serial.begin(115200);
   pixels.begin();
   Wire.begin();
   mpu.init();
 
   myGLCD.InitLCD();
-  myGLCD.setFont(SmallFont);
 
   for (int i = 0; i < 50; i++)
   {
@@ -25,17 +30,15 @@ void setup() {
     delay(5);
   }
 
-  while(!ms5.begin(MS5611_ULTRA_HIGH_RES,1020.0f)) delay(100);
+  while (!ms5.begin(MS5611_ULTRA_HIGH_RES, 102000)) delay(100);
 
+  p = ms5.readPressure(true);
+  ms5.newQNH(p);
+  reg.lr_Init(p*10,10);
   //reg.lr_Init((long)bme.simple_altitude(bme.pressure) * 100, 20);
 
   pinMode(7, OUTPUT); //power enable
   pinMode(2, INPUT); //switch 1, power.
   pinMode(3, INPUT_PULLUP); //switch 2
   pinMode(4, INPUT_PULLUP); //switch 3
-
-  digitalWrite(7, HIGH);
-  toneAC(800);
-  delay(100);
-  toneAC(0);
 }
