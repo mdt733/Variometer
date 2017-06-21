@@ -35,8 +35,5 @@ float interpolate_table_1d(struct table_1d * table, float x)
                                  x);                         /* x  */
     }
   }
-
-  /* Something with the data was wrong if we get here */
-  /* Saturate to the max value */
   return table->y_values[table->x_length - 1];
 }

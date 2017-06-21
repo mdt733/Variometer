@@ -10,10 +10,71 @@ float filVel;
 float temper;
 float alti;
 
+char page;
+char a, b;
+
+char buttonState;
+char sw_state;
+unsigned long sw_time;
+unsigned long toneStop;
 void loop()
 {
   digitalWrite(7, digitalRead(4));
+
   t = millis();
+  buttonState = (PIND & (1<<2))>>2;   //digitalRead(2); //reverse pin 2 (low vs high)
+  switch (sw_state)
+  {
+    case 0: //clear, no flags
+      if (buttonState == 1) //pressed in
+      {
+        sw_state = 1;  //press time
+        sw_time = t;
+      }
+      break;
+
+    case 1: // high. pre debounce
+      if (buttonState == 0) sw_state = 0; //nevermind, too short a press
+      if (t - sw_time >= 5) //held in, make a noise, and go to state 2;
+      {
+        toneAC(1000);
+        toneStop = t + 50;
+        sw_state = 2; //pressed
+      }
+      break;
+
+    case 2: // high, post debounce
+      if (buttonState == 0) sw_state = 4; //short press flag;
+      if (t - sw_time >= 600) //long hold, make a noise, and go to state 3;
+      {
+        //start higher tone
+        toneAC(2000);
+        toneStop = t + 50;
+        sw_state = 3; //pressed
+      }
+      break;
+
+    case 3: //long hold
+      if (buttonState == 0) sw_state = 5; //long press flag;
+      if (t - sw_time >= 5000) //power hold;
+      {
+        //shut down.
+        digitalWrite(7, LOW);
+      }
+      break;
+  }
+
+  if (toneStop > 0)
+  {
+    t = millis();
+    if (t >= toneStop)
+    {
+      toneStop = 0;
+      toneAC(0);
+    }
+  }
+
+t = millis();
   dt = t - timers[0];
   if (dt >= 100)
   { timers[0] = t;
@@ -44,11 +105,11 @@ void loop()
   dt = t - timers[3];
   if (dt >= 40) //process Barometer
   { timers[3] = t;
-  p = ms5.readPressure(true);
-  
+    p = ms5.readPressure(true);
+
     //bme.read();
     //altitude = bme.simple_altitude(bme.pressure);
-    reg.lr_Sample(p*10);
+    reg.lr_Sample(p * 10);
   }
 
   t = millis();
@@ -67,32 +128,66 @@ void loop()
   if (dt >= 20)
   { timers[5] = t;
     /*Serial.print(""); Serial.print(batteryVoltage, 2);
-    Serial.print(","); Serial.print(baroAlt);
-    Serial.print(","); Serial.print(baroVel);
-    Serial.print(","); Serial.print(zaccel - gravity);
-    Serial.print(","); Serial.print(accVel);
+      Serial.print(","); Serial.print(baroAlt);
+      Serial.print(","); Serial.print(baroVel);
+      Serial.print(","); Serial.print(zaccel - gravity);
+      Serial.print(","); Serial.print(accVel);
 
 
-    Serial.print(",-1,0,1");
-    Serial.println();
-*/
+      Serial.print(",-1,0,1");
+      Serial.println();
+    */
     myGLCD.clrScr();
     myGLCD.setFont(TinyFont);
-   // myGLCD.print("volt:", LEFT, 0);
+    // myGLCD.print("volt:", LEFT, 0);
     myGLCD.print("s:", LEFT, 0);
-    myGLCD.printNumI(digitalRead(2),8,0);
-    myGLCD.printNumI(digitalRead(3),12,0);
-    myGLCD.printNumI(digitalRead(4),16,0);
-    myGLCD.printNumI(millis()/100,0,6);
-   // myGLCD.printNumF(temper,2,0,12);
-    
-    
+    myGLCD.printNumI(digitalRead(2), 8, 0);
+    myGLCD.printNumI(digitalRead(3), 12, 0);
+    myGLCD.printNumI(digitalRead(4), 16, 0);
+    myGLCD.printNumI(millis() / 100, 0, 6);
+    myGLCD.printNumI(buttonState, 0, 12);
+    myGLCD.printNumI(sw_state, 0, 18);
+    myGLCD.printNumI(t - sw_time, 0, 24);
+
+
+    // myGLCD.printNumF(temper,2,0,12);
+
+
     myGLCD.setFont(SmallFont);
-    myGLCD.printNumF(batteryVoltage,2,RIGHT,0);
-    myGLCD.printNumF(temper,2,RIGHT,8);
-    myGLCD.printNumI(p,RIGHT,16);
-    myGLCD.printNumF(ms5.simple_altitude(reg.gZAverage*0.1f),1,RIGHT,24);
-    
+    myGLCD.printNumF(batteryVoltage, 2, RIGHT, 0);
+    myGLCD.printNumF(temper, 2, RIGHT, 8);
+    myGLCD.printNumI(p, RIGHT, 16);
+    myGLCD.printNumF(ms5.simple_altitude(reg.gZAverage * 0.1f), 1, RIGHT, 24);
+
+    myGLCD.printNumI(page, RIGHT, 32);
+
+    switch (page)
+    {
+      case 0:
+        myGLCD.printNumI(a, RIGHT, 40);
+
+        if (sw_state == 4)
+        {
+          sw_state = 0;
+          a++;
+        }
+        break;
+      case 1:
+        myGLCD.printNumI(b, RIGHT, 40);
+
+        if (sw_state == 4)
+        {
+          sw_state = 0;
+          b++;
+        }
+        break;
+    }
+    if (sw_state == 5)
+    {
+      sw_state = 0;
+      page ^= 1;
+    }
+
     myGLCD.update();
 
     i = (int) map_float(batteryVoltage, 3.2, 4.2, 0, 255);

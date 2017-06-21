@@ -1,10 +1,19 @@
 #include<Wire.h>
-
 #include <toneAC.h>
-
 #include <LCD5110_Graph.h>
 
 LCD5110 myGLCD(13,11,12,8,5);
+
+#define SW1_PORT PORTD
+#define SW2_PORT PORTD
+#define SW3_PORT PORTD
+
+#define SW1_PIN 2
+#define SW2_PIN 3
+#define SW3_PIN 4
+
+#define POWER_PORT PORTD
+#define POWER_PIN 7
 
 extern uint8_t SmallFont[];
 extern uint8_t MediumNumbers[];

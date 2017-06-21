@@ -2,7 +2,14 @@ float gravity;
 uint32_t p;
 
 void setup() {
-  digitalWrite(7, HIGH);
+  DDRD |= (1<<7); //pin 7 to output
+  DDRD &= ~(1<<2); //2, 3, 4 to input;
+  DDRD &= ~(1<<3);
+  DDRD &= ~(1<<4);
+
+  PORTD |= (1<<7); //pin 7 to high
+  PORTD |= (1<<3)|(1<<4); //pull up on pins 3,4
+
   toneAC(800);
   delay(100);
   toneAC(0);
@@ -37,8 +44,5 @@ void setup() {
   reg.lr_Init(p*10,10);
   //reg.lr_Init((long)bme.simple_altitude(bme.pressure) * 100, 20);
 
-  pinMode(7, OUTPUT); //power enable
-  pinMode(2, INPUT); //switch 1, power.
-  pinMode(3, INPUT_PULLUP); //switch 2
-  pinMode(4, INPUT_PULLUP); //switch 3
+
 }
