@@ -14,7 +14,7 @@ float interpolate_segment(float x0, float y0, float x1, float y1, float x)
   return y0 + t * (y1 - y0);
 }
 
-float interpolate_table_1d(struct table_1d * table, float x)
+float interpolate_table_1d(struct table_1d * table, float x) //TODO: interpolate search
 {
   uint8_t segment;
 

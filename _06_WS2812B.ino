@@ -4,9 +4,9 @@
 #define NUMPIXELS      3
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
-long pwmx[] = {0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240, 255};
-long pwmy[] = {0, 1, 2, 3, 5, 7, 11, 15, 22, 31, 44, 63, 89, 127, 179, 255};
-static struct table_1d pwm_table = {16, pwmx, pwmy};
+long pwmx[] = {0, 64, 112, 176, 255};
+long pwmy[] = {0,  5,  15,  63, 255};
+static struct table_1d pwm_table = {5, pwmx, pwmy};
 
 void spectrum(int led, int value, char x, char y, char z) //0-255 input, led * xyz / 10
 {
