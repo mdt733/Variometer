@@ -68,7 +68,7 @@ void setup() {
   altitude = ms5.simple_altitude(p);
  // reg.lr_Init((long)altitude * 100,5);
 
-  kalAlt.init(altitude, 0, 0.1, 0.3, millis());
+  kalAlt.init(altitude, 0, 0.2, 0.3, millis());
 
   page = 1;
 

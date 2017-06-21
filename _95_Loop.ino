@@ -39,10 +39,8 @@ void loop()
 
       case 3: //long hold
         if (buttonState[i] == 0) sw_state[i] = 5; //long press flag;
-        if (t - sw_time[i] >= 5000) //power hold;
-        {
-          PORTD = 0; //kill everything.
-        }
+        if (t - sw_time[i] >= 5000) PORTD = 0; //kill everything.
+        
         break;
     }
   }
@@ -78,6 +76,7 @@ void loop()
   { timers[2] = t;
     imu.MahonyAcc(mpu.scaled_Ax, mpu.scaled_Ay, mpu.scaled_Az, 0.001f * dt);
     zaccel = imu.imu_GravityCompensatedAccel(mpu.scaled_Ax, mpu.scaled_Ay, mpu.scaled_Az);
+    gravity = 0.99*gravity+0.01*zaccel;
   }
 
   t = millis();
@@ -91,9 +90,10 @@ void loop()
 
   t = millis();
   dt = t - timers[4];
-  if (dt >= 50) //process
+  if (dt >= 40) //process
   { timers[4] = t;
     temper = ms5.readTemperature(true);
+    kalAlt.update(altitude, (zaccel - gravity), millis());
     //reg.lr_CalculateAverage();
     //reg.lr_CalculateSlope();
     //sl = 0.9 * sl + 0.1 * (-0.01 * reg.gSlope);
@@ -110,14 +110,16 @@ void loop()
       case 1:
         myGLCD.setFont(MediumNumbers);
         myGLCD.printNumF(altitude, 1, RIGHT, 0);
-        myGLCD.printNumF(-3.4f, 1, RIGHT, 16);
-        //myGLCD.printNumF(sl, 1, RIGHT, 16);
-
+        //myGLCD.printNumF(-3.4f, 1, RIGHT, 16);
+        myGLCD.printNumF(kalAlt.getVelocity(), 1, RIGHT, 16);
+        Serial.println(kalAlt.getVelocity());
+        
         //myGLCD.setFont(SmallFont);
         //myGLCD.print("12:34", LEFT, 16);
         //myGLCD.print("2.3m/s", LEFT, 24);
         myGLCD.setFont(TinyFont);
         myGLCD.printNumF(batteryVoltage, 2, RIGHT, 36);
+        myGLCD.printNumF(zaccel,3,LEFT,36);
         //myGLCD.print("v|SNK0|V012", 18, 36);
         myGLCD.print("PAGE  |  VOL  |  ALT1", LEFT, 42);
        
