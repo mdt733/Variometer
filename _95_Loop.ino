@@ -2,8 +2,8 @@ void loop()
 {
   t = millis();
   buttonState[0] = (PIND & (1 << 2)) >> 2; //digitalRead(2); //reverse pin 2 (low vs high)
-  buttonState[1] = 1 - (PIND & (1 << 3)) >> 3;
-  buttonState[2] = 1 - (PIND & (1 << 4)) >> 4;
+  buttonState[1] = (~(PIND & (1 << 3)) >> 3) + 2;
+  buttonState[2] = (~(PIND & (1 << 4)) >> 4) + 2; //shh
 
   for (int i = 0; i < 3; i++)
   {
@@ -40,12 +40,13 @@ void loop()
 
       case 3: //long hold
         if (buttonState[i] == 0) sw_state[i] = 5; //long press flag;
-        if (t - sw_time[i] >= 3000)
-        { PORTD = 0; //kill everything.
-          toneAC(400);
+        if (i == 1)
+        {
+          if (t - sw_time[i] >= 3000)
+          { PORTD = 0; //kill everything.
+            toneAC(400);
+          }
         }
-
-
         break;
     }
   }
@@ -113,20 +114,13 @@ void loop()
     myGLCD.clrScr();
     switch (page)
     {
+
+      //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PAGE 1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       case 1:
         myGLCD.setFont(b);
-        if (alt1)
-        {
-          myGLCD.printNumI(altitude, LEFT, 0, 4, '0');
 
-        }
-        else
-        {
-          myGLCD.printNumI(altitude - alt2, LEFT, 0, 4, '0');
-
-        }
-
-        //myGLCD.printNumF(-3.4f, 1, RIGHT, 16);
+        if (alt1 == 1) myGLCD.printNumI(altitude, LEFT, 0, 4, '0');
+        else          myGLCD.printNumI(altitude - alt2, LEFT, 0, 4, '0');
 
         if ((kalAlt.getVelocity() >= 10) || (kalAlt.getVelocity() <= -10))
         {
@@ -152,9 +146,11 @@ void loop()
 
         myGLCD.setFont(TinyFont);
         myGLCD.printNumF(batteryVoltage, 1, 72, 2);
-        //myGLCD.printNumF(PVVoltage, 1, RIGHT, 6);
+        myGLCD.printNumI(sw_state[2], RIGHT, 12);
 
-        myGLCD.print("PAGE  |  VOL  | ALT 1", LEFT, 43);
+
+        myGLCD.print("PAGE  |  VOL  | ALT", LEFT, 43);
+        myGLCD.printNumI(2 - alt1, RIGHT, 43);
 
         myGLCD.drawLine(49, 0, 49, 42); //right side of big numbers
         myGLCD.drawLine(0, 42, 84, 42); //above button labels
@@ -167,20 +163,20 @@ void loop()
           sw_state[0] = 0;
           page = 2;
         }
-
         if (sw_state[0] == 5) sw_state[0] = 0;
+
         if (sw_state[1] == 4) sw_state[1] = 0;
         if (sw_state[1] == 5) sw_state[1] = 0;
 
         if (sw_state[2] == 4) //toggle altitude view
         {
-          alt1 = ~alt1;
+          alt1 = 1 - alt1;
           sw_state[2] = 0;
         }
 
         if (sw_state[2] == 5)
         {
-          if (alt1)
+          if (alt1 == 1)
           { //go to qnh page
             page = 3;
           }
@@ -190,9 +186,8 @@ void loop()
           }
           sw_state[2] = 0;
         }
-
-
         break;
+      //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PAGE 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       case 2:
         myGLCD.setFont(SmallFont);
         myGLCD.printNumF(temper, 2, LEFT, 0);
@@ -203,9 +198,8 @@ void loop()
         myGLCD.printNumF(batteryVoltage, 3, RIGHT, 16);
         myGLCD.drawLine(0, 42, 84, 42); //above button labels
 
-        if (sw_state[0] == 4) {
-          sw_state[0] = 0;
-        }
+        if (sw_state[0] == 4) sw_state[0] = 0;
+
         if (sw_state[0] == 5)
         {
           sw_state[0] = 0;
@@ -218,6 +212,8 @@ void loop()
         if (sw_state[2] == 5) sw_state[2] = 0;
 
         break;
+
+      //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PAGE 3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       case 3:
         myGLCD.setFont(SmallFont);
         myGLCD.print("QNH:", LEFT, 0);
@@ -226,35 +222,45 @@ void loop()
         myGLCD.printNumF(altitude, 1, RIGHT, 10);
         myGLCD.print("Pres", LEFT, 20);
         myGLCD.printNumI(p, RIGHT, 20);
-
-        //pres
-        //temp
-
+        myGLCD.print("ALT2", LEFT, 30);
+        myGLCD.printNumF(alt2, 1, RIGHT, 30);
 
         myGLCD.setFont(TinyFont);
         myGLCD.print(" OKAY |   -1  |   +1 ", LEFT, 43);
         myGLCD.drawLine(0, 42, 84, 42); //above button labels
 
-        if (sw_state[0] == 4) {
+        if (sw_state[0] == 4)
+        {
           sw_state[0] = 0;
         }
+
         if (sw_state[0] == 5)
         {
           sw_state[0] = 0;
           page = 1;
         }
+
         if (sw_state[1] == 4)
+        {
+          ms5.newQNH(ms5.QNH - 10);
+          sw_state[1] = 0;
+        }
+
+        if (sw_state[1] == 5)
         {
           ms5.newQNH(ms5.QNH - 100);
           sw_state[1] = 0;
         }
-        if (sw_state[1] == 5) sw_state[1] = 0;
         if (sw_state[2] == 4)
+        {
+          ms5.newQNH(ms5.QNH + 10);
+          sw_state[2] = 0;
+        }
+        if (sw_state[2] == 5)
         {
           ms5.newQNH(ms5.QNH + 100);
           sw_state[2] = 0;
         }
-        if (sw_state[2] == 5) sw_state[2] = 0;
         break;
     }
     myGLCD.update();
