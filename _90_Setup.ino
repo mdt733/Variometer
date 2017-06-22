@@ -23,6 +23,8 @@ unsigned long sw_time[3];
 unsigned long toneStop;
 float sl;
 
+char alt1;
+float alt2;
 
 void setup() {
   DDRD |= (1 << 7); //pin 7 to output
@@ -64,11 +66,14 @@ void setup() {
   while (!ms5.begin(MS5611_ULTRA_HIGH_RES, 102000)) delay(100);
 
   p = ms5.readPressure(true);
-  ms5.newQNH(p + 2000);
+  ms5.newQNH(p + 3000);
 
   altitude = ms5.simple_altitude(p);
  // reg.lr_Init((long)altitude * 100,5);
 
+  alt1 = true;
+  alt2 = altitude;
+  
   kalAlt.init(altitude, 0, 0.2, 0.5, millis());
 
   page = 1;
