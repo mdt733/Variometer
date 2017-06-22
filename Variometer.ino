@@ -9,6 +9,8 @@ kalmanvert kalAlt;
 LCD5110 myGLCD(13,11,12,8,5);
 
 extern uint8_t SmallFont[];
+extern uint8_t b[];
+
 extern uint8_t MediumNumbers[];
 extern uint8_t BigNumbers[];
 extern unsigned char TinyFont[];
@@ -30,8 +32,14 @@ long readVcc() {
 }
 
 
-float readv, batteryVoltage;
+float readv, batteryVoltage, PVVoltage;
 void readVoltages(void)
 { readv = readVcc();
   batteryVoltage = 0.01f * (analogRead(A0) * readv) / 8270;
 }
+
+void readPVVoltage(void)
+{
+  PVVoltage = 0.01f * (analogRead(A7) * readv) / 5315;
+}
+

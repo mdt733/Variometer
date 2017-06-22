@@ -26,11 +26,12 @@ float sl;
 
 void setup() {
   DDRD |= (1 << 7); //pin 7 to output
+  PORTD |= (1 << 7); //pin 7 to high
+
   DDRD &= ~(1 << 2); //2, 3, 4 to input;
   DDRD &= ~(1 << 3);
   DDRD &= ~(1 << 4);
 
-  PORTD |= (1 << 7); //pin 7 to high
   PORTD |= (1 << 3) | (1 << 4); //pull up on pins 3,4
 
   toneAC(800);
@@ -68,7 +69,7 @@ void setup() {
   altitude = ms5.simple_altitude(p);
  // reg.lr_Init((long)altitude * 100,5);
 
-  kalAlt.init(altitude, 0, 0.2, 0.3, millis());
+  kalAlt.init(altitude, 0, 0.2, 0.5, millis());
 
   page = 1;
 

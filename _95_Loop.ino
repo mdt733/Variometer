@@ -39,8 +39,12 @@ void loop()
 
       case 3: //long hold
         if (buttonState[i] == 0) sw_state[i] = 5; //long press flag;
-        if (t - sw_time[i] >= 5000) PORTD = 0; //kill everything.
-        
+        if (t - sw_time[i] >= 4000)
+        { PORTD = 0; //kill everything.
+          toneAC(400);
+        }
+
+
         break;
     }
   }
@@ -59,6 +63,7 @@ void loop()
   if (dt >= 500)
   { timers[0] = t;
     readVoltages();
+    readPVVoltage();
     if (batteryVoltage <= 3.3f) PORTD = 0; //low voltage cut off
   }
 
@@ -76,7 +81,7 @@ void loop()
   { timers[2] = t;
     imu.MahonyAcc(mpu.scaled_Ax, mpu.scaled_Ay, mpu.scaled_Az, 0.001f * dt);
     zaccel = imu.imu_GravityCompensatedAccel(mpu.scaled_Ax, mpu.scaled_Ay, mpu.scaled_Az);
-    gravity = 0.99*gravity+0.01*zaccel;
+    gravity = 0.99 * gravity + 0.01 * zaccel;
   }
 
   t = millis();
@@ -108,21 +113,37 @@ void loop()
     switch (page)
     {
       case 1:
-        myGLCD.setFont(MediumNumbers);
-        myGLCD.printNumF(altitude, 1, RIGHT, 0);
+        myGLCD.setFont(b);
+        myGLCD.printNumI(altitude, LEFT, 0, 4, '0');
+
         //myGLCD.printNumF(-3.4f, 1, RIGHT, 16);
-        myGLCD.printNumF(kalAlt.getVelocity(), 1, RIGHT, 16);
-        Serial.println(kalAlt.getVelocity());
-        
+
+        if ((kalAlt.getVelocity() >= 10) || (kalAlt.getVelocity() <= -10))
+        {
+          myGLCD.printNumF(abs(kalAlt.getVelocity()), 1, LEFT, 16)
+        }
+        else
+        {
+          if (kalAlt.getVelocity() > 0)
+          {
+            myGLCD.print("/", LEFT, 16);
+            myGLCD.printNumF(kalAlt.getVelocity(), 1, 12, 16);
+          }
+          else
+          {
+            myGLCD.printNumF(kalAlt.getVelocity(), 1, LEFT, 16, '.', 4, '-');
+          }
+        }
+
         //myGLCD.setFont(SmallFont);
         //myGLCD.print("12:34", LEFT, 16);
         //myGLCD.print("2.3m/s", LEFT, 24);
         myGLCD.setFont(TinyFont);
         myGLCD.printNumF(batteryVoltage, 2, RIGHT, 36);
-        myGLCD.printNumF(zaccel,3,LEFT,36);
+        myGLCD.printNumF(PVVoltage, 2, LEFT, 36);
         //myGLCD.print("v|SNK0|V012", 18, 36);
-        myGLCD.print("PAGE  |  VOL  |  ALT1", LEFT, 42);
-       
+        myGLCD.print("PAGE  |  VOL  | ALT 1", LEFT, 42);
+
 
         if (sw_state[0] == 4) //short button press
         {
