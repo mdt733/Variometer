@@ -92,7 +92,7 @@ void loop()
   dt = t - timers[3];
   if (dt >= 40) //process Barometer
   { timers[3] = t;
-    p = ms5.readPressure(true);
+    pressure = ms5.readPressure(true);
     reg.lr_Sample(ms5.simple_altitude(pressure) * 100);
   }
 
@@ -103,7 +103,8 @@ void loop()
     temperature = ms5.readTemperature(true);
     reg.lr_CalculateSlope();
     reg.lr_CalculateAverage();
-    altitude = reg.gZAverage
+    altitude = reg.gZAverage*0.01f;
+    zVelocity = reg.gSlope*0.01f;
   }
 
   t = millis();
@@ -120,20 +121,20 @@ void loop()
         if (alt1 == 1) myGLCD.printNumI(altitude, LEFT, 0, 4, '0');
         else          myGLCD.printNumI(altitude - alt2, LEFT, 0, 4, '0');
 
-        if ((kalAlt.getVelocity() >= 10) || (kalAlt.getVelocity() <= -10))
+        if ((zVelocity >= 10) || (zVelocity <= -10))
         {
-          myGLCD.printNumF(abs(kalAlt.getVelocity()), 1, LEFT, 16);
+          myGLCD.printNumF(abs(zVelocity), 1, LEFT, 16);
         }
         else
         {
-          if (kalAlt.getVelocity() > 0)
+          if (zVelocity > 0)
           {
             myGLCD.print("/", LEFT, 16);
-            myGLCD.printNumF(kalAlt.getVelocity(), 1, 12, 16);
+            myGLCD.printNumF(zVelocity, 1, 12, 16);
           }
           else
           {
-            myGLCD.printNumF(kalAlt.getVelocity(), 1, LEFT, 16, '.', 4, '-');
+            myGLCD.printNumF(zVelocity, 1, LEFT, 16, '.', 4, '-');
           }
         }
 
@@ -175,7 +176,7 @@ void loop()
       case 2:
         myGLCD.setFont(SmallFont);
         myGLCD.printNumF(temperature, 2, LEFT, 0);
-        myGLCD.printNumI(p, LEFT, 8);
+        myGLCD.printNumI(pressure, LEFT, 8);
         myGLCD.printNumF(PVVoltage, 2, LEFT, 16);
         myGLCD.print("12:34a", RIGHT, 0);
         myGLCD.print("17/Nov", RIGHT, 8);
@@ -195,7 +196,7 @@ void loop()
         myGLCD.print("Alt:", LEFT, 10);
         myGLCD.printNumF(altitude, 1, RIGHT, 10);
         myGLCD.print("Pres", LEFT, 20);
-        myGLCD.printNumI(p, RIGHT, 20);
+        myGLCD.printNumI(pressure, RIGHT, 20);
         myGLCD.print("ALT2", LEFT, 30);
         myGLCD.printNumF(alt2, 1, RIGHT, 30);
 

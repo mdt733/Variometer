@@ -12,6 +12,7 @@ float gravity;
 uint32_t pressure;
 float altitude;
 float temperature;
+float zVelocity;
 
 char buttonState[3];
 char sw_state[3];
@@ -72,7 +73,7 @@ void setup() {
   ms5.newQNH(EEPROMReadlong(1));
 
   altitude = ms5.simple_altitude(pressure);
-  reg.lr_Init((long)altitude * 100, 5);
+  reg.lr_Init((long)altitude * 100, 20);
 
   alt1 = 1;
   alt2 = altitude;
