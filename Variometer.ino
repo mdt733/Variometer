@@ -1,12 +1,16 @@
+//#define MPU
+//#define PIXEL
+
+#include "EEPROM.h"
 #include<Wire.h>
 #include <toneAC.h>
 #include <kalmanvert.h>
 
 #include <LCD5110_Graph.h>
 
-kalmanvert kalAlt;
+//kalmanvert kalAlt;
 
-LCD5110 myGLCD(13,11,12,8,5);
+LCD5110 myGLCD(13, 11, 12, 8, 5);
 
 extern uint8_t SmallFont[];
 extern uint8_t b[];
@@ -43,3 +47,30 @@ void readPVVoltage(void)
   PVVoltage = 0.01f * (analogRead(A7) * readv) / 5315;
 }
 
+long EEPROMReadlong(long address)
+{
+  //Read the 4 bytes from the eeprom memory.
+  long four = EEPROM.read(address);
+  long three = EEPROM.read(address + 1);
+  long two = EEPROM.read(address + 2);
+  long one = EEPROM.read(address + 3);
+
+  //Return the recomposed long by using bitshift.
+  return ((four << 0) & 0xFF) + ((three << 8) & 0xFFFF) + ((two << 16) & 0xFFFFFF) + ((one << 24) & 0xFFFFFFFF);
+}
+
+void EEPROMWritelong(int address, long value)
+{
+  //Decomposition from a long to 4 bytes by using bitshift.
+  //One = Most significant -> Four = Least significant byte
+  byte four = (value & 0xFF);
+  byte three = ((value >> 8) & 0xFF);
+  byte two = ((value >> 16) & 0xFF);
+  byte one = ((value >> 24) & 0xFF);
+
+  //Write the 4 bytes into the eeprom memory.
+  EEPROM.write(address, four);
+  EEPROM.write(address + 1, three);
+  EEPROM.write(address + 2, two);
+  EEPROM.write(address + 3, one);
+}
