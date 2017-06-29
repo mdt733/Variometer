@@ -1,27 +1,22 @@
-float gravity;
-uint32_t p;
 char page;
 
 unsigned long timers[6];
 unsigned long t, dt, i;
 
-float baroAlt, baroVel;
-float altitude;
+
+#ifdef MPU
 float zaccel;
-float accVel;
-float filVel;
+float gravity;
+#endif
 
-float temper;
-float alti;
-
-//char page;
-
+uint32_t pressure;
+float altitude;
+float temperature;
 
 char buttonState[3];
 char sw_state[3];
 unsigned long sw_time[3];
 unsigned long toneStop;
-float sl;
 
 char alt1;
 float alt2;
@@ -41,11 +36,18 @@ void setup() {
   toneAC(0);
 
   Serial.begin(115200);
+
+#ifdef PIXEL
   pixels.begin();
-  Wire.begin();
-  mpu.init();
+#endif
 
   myGLCD.InitLCD();
+
+  Wire.begin();
+
+#ifdef MPU
+  mpu.init();
+
 
   for (int i = 0; i < 30; i++)
   {
@@ -62,19 +64,20 @@ void setup() {
     gravity = 0.95 * gravity + 0.05 * imu.imu_GravityCompensatedAccel(mpu.scaled_Ax, mpu.scaled_Ay, mpu.scaled_Az);
     delay(5);
   }
+#endif
 
   while (!ms5.begin(MS5611_ULTRA_HIGH_RES, 102000)) delay(100);
 
-  p = ms5.readPressure(true);
-  ms5.newQNH(p + 3000);
+  pressure = ms5.readPressure(true);
+  ms5.newQNH(EEPROMReadlong(1));
 
-  altitude = ms5.simple_altitude(p);
- // reg.lr_Init((long)altitude * 100,5);
+  altitude = ms5.simple_altitude(pressure);
+  reg.lr_Init((long)altitude * 100, 5);
 
   alt1 = 1;
   alt2 = altitude;
-  
-  kalAlt.init(altitude, 0, 0.2, 0.5, millis());
+
+  //kalAlt.init(altitude, 0, 0.2, 0.5, millis());
 
   page = 1;
 

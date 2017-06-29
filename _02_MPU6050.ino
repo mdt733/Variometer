@@ -1,3 +1,5 @@
+#ifdef MPU
+
 #define GYK  0.00053134110765f //gyro scale factor
 #define ESHIFT 2
 
@@ -87,3 +89,5 @@ class mMPU
 };
 
 mMPU mpu;
+
+#endif

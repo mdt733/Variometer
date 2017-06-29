@@ -1,4 +1,4 @@
-#define MAX_Z_SAMPLES   50
+#define MAX_Z_SAMPLES   10
 #define SENSOR_SAMPLES_PER_SEC  25L
 
 class REG

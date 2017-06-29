@@ -1,8 +1,8 @@
+#ifdef MPU
 class mIMU
 {
     float twoKp = 1.0f, twoKi = 0.2f;
     float integralFBx = 0.0f,  integralFBy = 0.0f, integralFBz = 0.0f;
-    float Zaccel_error;
 
     float invSqrt(float x)
     {
@@ -105,4 +105,4 @@ class mIMU
 
 mIMU imu;
 
-
+#endif

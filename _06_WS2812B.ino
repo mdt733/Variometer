@@ -1,3 +1,5 @@
+#ifdef PIXEL
+
 #include <Adafruit_NeoPixel.h>
 
 #define PIN            6
@@ -28,3 +30,5 @@ void colourBar(int i)
   spectrum(0, i, 5, 1, 0);   //  r g b output colour range value r g b
   pixels.show(); // This sends the updated pixel color to the hardware.
 }
+
+#endif
